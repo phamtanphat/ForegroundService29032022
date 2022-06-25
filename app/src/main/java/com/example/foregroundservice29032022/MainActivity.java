@@ -36,5 +36,13 @@ public class MainActivity extends AppCompatActivity {
                 notificationManager.notify(1, notification);
             }
         });
+
+        btnStartForeground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MyService.class);
+                startService(intent);
+            }
+        });
     }
 }

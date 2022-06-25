@@ -2,6 +2,7 @@ package com.example.foregroundservice29032022;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -26,10 +27,12 @@ public class MainActivity extends AppCompatActivity {
         btnCreateNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
                 Notification notification = NotificationUtils.createNotification(
-                                                                MainActivity.this,
-                                                                "Thông báo",
-                                                                "Bạn có tin nhắn mới");
+                                                            MainActivity.this,
+                                                            "Thông báo",
+                                                            "Bạn có tin nhắn mới",
+                                                            intent);
                 notificationManager.notify(1, notification);
             }
         });

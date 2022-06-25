@@ -15,8 +15,8 @@ public class MyApplication extends Application {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(
-                                                                "channel_id",
-                                                                "My Channel",
+                                                                "my_channel",
+                                                                "Quảng cáo",
                                                                 NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(notificationChannel);
         }

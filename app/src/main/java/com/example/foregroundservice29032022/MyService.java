@@ -1,12 +1,14 @@
 package com.example.foregroundservice29032022;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,9 +17,12 @@ import androidx.core.app.NotificationCompat;
 
 public class MyService extends Service {
 
-    boolean isPause = false;
+    boolean isPause;
     Notification notification;
     int count = 0;
+    Thread thread;
+    Handler handler;
+    NotificationManager manager;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -27,15 +32,44 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        isPause = false;
         Log.d("BBB", "onCreate");
         notification = createNotification(count + "");
+        handler = new Handler(Looper.getMainLooper());
+        manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         startForeground(1, notification);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("BBB", "onStartCommand");
-        return START_STICKY;
+        if (intent != null) {
+            isPause = intent.getBooleanExtra("isPause", false);
+        }
+        thread = new Thread(() -> {
+            Log.d("BBB",isPause + "");
+            for (int i = 0; i < 1000000;) {
+                if (!isPause) {
+                    try {
+                        count = i;
+                        Thread.sleep(1000);
+                        if (thread.isAlive()) {
+                            handler.post(() -> {
+                                notification = createNotification(count + "");
+                                manager.notify(1, notification);
+                            });
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    i++;
+                } else {
+                    break;
+                }
+            }
+        });
+        thread.start();
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -53,9 +87,9 @@ public class MyService extends Service {
         Intent intentOpenActivity = new Intent(MyService.this, MainActivity.class);
         PendingIntent pendingOpenActivity = PendingIntent.getActivity(MyService.this, 0, intentOpenActivity, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent intentPause = new Intent(MyService.this, MainActivity.class);
+        Intent intentPause = new Intent(MyService.this, MyService.class);
         intentPause.putExtra("isPause", true);
-        PendingIntent pendingPause = PendingIntent.getActivity(MyService.this, 0, intentOpenActivity, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingPause = PendingIntent.getService(MyService.this, 0, intentPause, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.setContentIntent(pendingOpenActivity);
         builder.addAction(android.R.drawable.ic_media_pause, "Pause", pendingPause);

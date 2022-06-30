@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -23,10 +24,19 @@ public class MyService extends Service {
     Thread thread;
     Handler handler;
     NotificationManager manager;
+    private OnListenerCounter onListenerCounter;
+    private final IBinder binder = new MyBinder();
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
+    }
+
+    public class MyBinder extends Binder {
+        MyService getService() {
+            return MyService.this;
+        }
     }
 
     @Override
@@ -55,6 +65,10 @@ public class MyService extends Service {
                         Thread.sleep(1000);
                         if (thread.isAlive()) {
                             handler.post(() -> {
+                                if (onListenerCounter != null) {
+                                    onListenerCounter.onCountChange(count);
+                                }
+
                                 notification = createNotification(count + "");
                                 manager.notify(1, notification);
                             });
@@ -94,5 +108,13 @@ public class MyService extends Service {
         builder.setContentIntent(pendingOpenActivity);
         builder.addAction(android.R.drawable.ic_media_pause, "Pause", pendingPause);
         return builder.build();
+    }
+
+    public void setOnListenerCounter(OnListenerCounter onListenerCounter) {
+        this.onListenerCounter = onListenerCounter;
+    }
+
+    interface OnListenerCounter {
+        void onCountChange(int count);
     }
 }

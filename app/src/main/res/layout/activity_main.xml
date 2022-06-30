@@ -8,6 +8,14 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <TextView
+        android:layout_marginBottom="10dp"
+        android:textSize="35sp"
+        android:text="Count: 0"
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <Button
         android:id="@+id/button_create_notification"
         android:layout_width="wrap_content"

@@ -2,10 +2,15 @@ package com.example.foregroundservice29032022;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnCreateNotification, btnStartForeground, btnStopForeground;
     NotificationManager notificationManager;
+    TextView tvCount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         btnCreateNotification = findViewById(R.id.button_create_notification);
         btnStartForeground = findViewById(R.id.button_start_foreground_service);
         btnStopForeground = findViewById(R.id.button_stop_foreground_service);
+        tvCount = findViewById(R.id.textView);
 
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -43,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MyService.class);
                 intent.putExtra("text", "Hello");
                 startService(intent);
+                bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
             }
         });
 
@@ -54,4 +62,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MyService.MyBinder myBinder = (MyService.MyBinder) iBinder;
+            MyService myService = myBinder.getService();
+            myService.setOnListenerCounter(new MyService.OnListenerCounter() {
+                @Override
+                public void onCountChange(int count) {
+                    tvCount.setText("Count: " + count);
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
 }

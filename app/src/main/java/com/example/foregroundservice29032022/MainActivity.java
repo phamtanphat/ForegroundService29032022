@@ -1,5 +1,6 @@
 package com.example.foregroundservice29032022;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -81,4 +82,31 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (isMyServiceRunning(MyService.class)) {
+            Intent intent = new Intent(MainActivity.this, MyService.class);
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (serviceConnection != null) {
+            unbindService(serviceConnection);
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
